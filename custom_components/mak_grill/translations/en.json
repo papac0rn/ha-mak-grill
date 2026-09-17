@@ -1,0 +1,13 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "MAK Grill Setup",
+        "description": "Set up your MAK Pellet Boss WiFi grill. The integration registers an HTTP endpoint at /GrillService/Service that receives telemetry from the grill controller.",
+        "data": {
+          "grill_name": "Grill name"
+        }
+      }
+    }
+  }
+}
