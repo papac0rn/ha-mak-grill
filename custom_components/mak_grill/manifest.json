@@ -1,9 +1,11 @@
 {
   "domain": "mak_grill",
   "name": "MAK Grill (Pellet Boss WiFi)",
-  "codeowners": ["@jspoy"],
+  "codeowners": ["@papac0rn"],
   "config_flow": true,
-  "documentation": "https://github.com/bawilson2/mak-controller",
+  "dependencies": ["http"],
+  "documentation": "https://github.com/papac0rn/ha-mak-grill",
   "iot_class": "local_push",
+  "issue_tracker": "https://github.com/papac0rn/ha-mak-grill/issues",
   "version": "1.1.0"
 }
