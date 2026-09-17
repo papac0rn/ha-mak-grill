@@ -1,0 +1,137 @@
+<svg width="680" viewBox="0 0 680 580" xmlns="http://www.w3.org/2000/svg">
+<title>Papacorn comic avatar - grillmaster and home automation enthusiast</title>
+<desc>A fun comic-style portrait of a tech dad with grill, solar panels, and smart home passion</desc>
+
+<style>
+  .bg { fill: #FFF8E7; }
+  .frame { fill: none; stroke: #333; stroke-width: 3; }
+  .skin { fill: #E8B88A; }
+  .beard { fill: #6B4226; }
+  .hair { fill: #4A2E18; }
+  .cap { fill: #C62828; }
+  .cap-brim { fill: #B71C1C; }
+  .shades-frame { fill: #222; }
+  .shades-lens { fill: #1A1A1A; }
+  .shades-glare { fill: white; opacity: 0.3; }
+  .tee { fill: #2E7D32; }
+  .apron { fill: #D84315; }
+  .grill-steel { fill: #37474F; stroke: #263238; stroke-width: 2; }
+  .grill-top { fill: #455A64; }
+  .smoke1 { fill: none; stroke: #BDBDBD; stroke-width: 4; stroke-linecap: round; }
+  .smoke2 { fill: none; stroke: #BDBDBD; stroke-width: 3; stroke-linecap: round; opacity: 0.6; }
+  .flame-o { fill: #FF8F00; }
+  .flame-r { fill: #E65100; }
+  .tongs-m { fill: none; stroke: #78909C; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+  .corn-k { fill: #FFD54F; stroke: #F9A825; stroke-width: 1.2; }
+  .corn-husk { fill: #7CB342; }
+  .ha-circle { fill: #18BCF2; }
+  .bolt-y { fill: #FFD600; stroke: #F9A825; stroke-width: 1.5; }
+  .panel { fill: #1A237E; stroke: #0D1642; stroke-width: 1.2; }
+  .panel-g { stroke: #3949AB; stroke-width: 0.7; }
+  .wifi-s { fill: none; stroke: #18BCF2; stroke-width: 2.5; stroke-linecap: round; }
+  .speech-bg { fill: white; stroke: #333; stroke-width: 2; }
+  .st { fill: #333; font-family: sans-serif; }
+  .tag { fill: #555; font-family: sans-serif; font-size: 15px; }
+  .name-big { fill: #C62828; font-family: sans-serif; font-size: 36px; font-weight: 800; letter-spacing: 2px; }
+  .sub { fill: #666; font-family: sans-serif; font-size: 13px; }
+</style>
+
+<rect x="30" y="20" width="620" height="520" rx="16" class="bg"/>
+<rect x="30" y="20" width="620" height="520" rx="16" class="frame"/>
+
+<path d="M430,120 Q425,90 435,60 Q445,30 430,5" class="smoke1" opacity="0.35"/>
+<path d="M455,130 Q460,95 450,65 Q440,35 455,5" class="smoke2" opacity="0.25"/>
+<path d="M480,125 Q475,100 485,75" class="smoke2" opacity="0.2"/>
+
+<rect x="520" y="45" width="52" height="30" rx="2" class="panel" transform="rotate(-8,546,60)"/>
+<line x1="533" y1="45" x2="533" y2="75" class="panel-g" transform="rotate(-8,546,60)"/>
+<line x1="546" y1="45" x2="546" y2="75" class="panel-g" transform="rotate(-8,546,60)"/>
+<line x1="559" y1="45" x2="559" y2="75" class="panel-g" transform="rotate(-8,546,60)"/>
+<rect x="578" y="50" width="52" height="30" rx="2" class="panel" transform="rotate(-8,604,65)"/>
+<line x1="591" y1="50" x2="591" y2="80" class="panel-g" transform="rotate(-8,604,65)"/>
+<line x1="604" y1="50" x2="604" y2="80" class="panel-g" transform="rotate(-8,604,65)"/>
+<line x1="617" y1="50" x2="617" y2="80" class="panel-g" transform="rotate(-8,604,65)"/>
+<circle cx="615" cy="38" r="18" fill="#FFD600" opacity="0.5"/>
+
+<rect x="170" y="265" width="150" height="140" rx="12" class="tee"/>
+<rect x="190" y="275" width="110" height="120" rx="6" class="apron"/>
+<line x1="190" y1="285" x2="175" y2="295" stroke="#BF360C" stroke-width="2.5"/>
+<line x1="300" y1="285" x2="315" y2="295" stroke="#BF360C" stroke-width="2.5"/>
+<text x="245" y="318" text-anchor="middle" fill="white" font-family="sans-serif" font-size="13" font-weight="700">FORK IT,</text>
+<text x="245" y="336" text-anchor="middle" fill="white" font-family="sans-serif" font-size="13" font-weight="700">WE'LL DO IT</text>
+<text x="245" y="354" text-anchor="middle" fill="white" font-family="sans-serif" font-size="13" font-weight="700">IN PROD</text>
+
+<rect x="225" y="240" width="40" height="30" rx="6" class="skin"/>
+<ellipse cx="245" cy="195" rx="62" ry="65" class="skin"/>
+
+<path d="M195,215 Q195,270 245,280 Q295,270 295,215" class="beard" opacity="0.85"/>
+<line x1="215" y1="240" x2="218" y2="260" stroke="#5A3520" stroke-width="0.8" opacity="0.4"/>
+<line x1="235" y1="245" x2="235" y2="270" stroke="#5A3520" stroke-width="0.8" opacity="0.4"/>
+<line x1="255" y1="245" x2="255" y2="270" stroke="#5A3520" stroke-width="0.8" opacity="0.4"/>
+<line x1="275" y1="240" x2="272" y2="260" stroke="#5A3520" stroke-width="0.8" opacity="0.4"/>
+
+<path d="M225,245 Q245,260 265,245" fill="none" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" opacity="0.9"/>
+
+<rect x="204" y="178" width="36" height="28" rx="6" class="shades-frame"/>
+<rect x="250" y="178" width="36" height="28" rx="6" class="shades-frame"/>
+<rect x="207" y="181" width="30" height="22" rx="4" class="shades-lens"/>
+<rect x="253" y="181" width="30" height="22" rx="4" class="shades-lens"/>
+<ellipse cx="218" cy="188" rx="6" ry="4" class="shades-glare"/>
+<ellipse cx="264" cy="188" rx="6" ry="4" class="shades-glare"/>
+<line x1="240" y1="192" x2="250" y2="192" stroke="#222" stroke-width="3"/>
+<line x1="204" y1="188" x2="186" y2="182" stroke="#222" stroke-width="2.5"/>
+<line x1="286" y1="188" x2="304" y2="182" stroke="#222" stroke-width="2.5"/>
+
+<path d="M185,175 Q185,135 245,125 Q305,135 305,175" class="cap"/>
+<ellipse cx="245" cy="175" rx="68" ry="10" class="cap-brim"/>
+<text x="245" y="163" text-anchor="middle" fill="white" font-family="sans-serif" font-size="14" font-weight="700">MAK</text>
+
+<path d="M320,300 Q370,290 400,270" fill="none" stroke="#2E7D32" stroke-width="22" stroke-linecap="round"/>
+<circle cx="400" cy="268" r="12" class="skin"/>
+<path d="M408,260 L440,220 L445,225" class="tongs-m"/>
+<path d="M408,260 L435,218" class="tongs-m"/>
+<ellipse cx="448" cy="210" rx="8" ry="20" class="corn-k" transform="rotate(-25,448,210)"/>
+<line x1="444" y1="195" x2="444" y2="225" stroke="#F9A825" stroke-width="0.6" transform="rotate(-25,448,210)"/>
+<line x1="448" y1="195" x2="448" y2="225" stroke="#F9A825" stroke-width="0.6" transform="rotate(-25,448,210)"/>
+<line x1="452" y1="195" x2="452" y2="225" stroke="#F9A825" stroke-width="0.6" transform="rotate(-25,448,210)"/>
+<path d="M448,230 Q440,240 435,248" stroke="#558B2F" stroke-width="2" fill="none" transform="rotate(-25,448,210)"/>
+
+<path d="M170,300 Q120,310 100,330" fill="none" stroke="#2E7D32" stroke-width="22" stroke-linecap="round"/>
+<circle cx="98" cy="332" r="12" class="skin"/>
+<rect x="72" y="340" width="44" height="72" rx="6" fill="#222" stroke="#444" stroke-width="1.5"/>
+<rect x="76" y="346" width="36" height="58" rx="3" fill="#111"/>
+<circle cx="94" cy="368" r="14" class="ha-circle"/>
+<text x="94" y="373" text-anchor="middle" fill="white" font-family="sans-serif" font-size="12" font-weight="800">HA</text>
+<text x="94" y="394" text-anchor="middle" fill="#4CAF50" font-family="monospace" font-size="10" font-weight="700">275°F</text>
+
+<rect x="400" y="270" width="120" height="80" rx="8" class="grill-steel"/>
+<rect x="395" y="260" width="130" height="16" rx="6" class="grill-top"/>
+<line x1="410" y1="290" x2="510" y2="290" stroke="#546E7A" stroke-width="2"/>
+<line x1="410" y1="305" x2="510" y2="305" stroke="#546E7A" stroke-width="2"/>
+<line x1="410" y1="320" x2="510" y2="320" stroke="#546E7A" stroke-width="2"/>
+<ellipse cx="430" cy="340" rx="8" ry="12" class="flame-o" opacity="0.6"/>
+<ellipse cx="460" cy="338" rx="6" ry="14" class="flame-r" opacity="0.5"/>
+<ellipse cx="490" cy="340" rx="8" ry="11" class="flame-o" opacity="0.6"/>
+<line x1="415" y1="350" x2="410" y2="405" stroke="#37474F" stroke-width="4"/>
+<line x1="505" y1="350" x2="510" y2="405" stroke="#37474F" stroke-width="4"/>
+<circle cx="510" cy="410" r="10" fill="#424242" stroke="#333" stroke-width="1.5"/>
+<circle cx="510" cy="410" r="4" fill="#666"/>
+<rect x="435" y="295" width="50" height="18" rx="3" fill="#C62828"/>
+<text x="460" y="308" text-anchor="middle" fill="white" font-family="sans-serif" font-size="10" font-weight="700">MAK</text>
+
+<path d="M525,280 Q532,272 539,280" class="wifi-s" opacity="0.7"/>
+<path d="M521,274 Q532,262 543,274" class="wifi-s" opacity="0.5"/>
+<path d="M517,268 Q532,252 547,268" class="wifi-s" opacity="0.35"/>
+
+<polygon points="80,440 70,465 82,462 72,490 95,458 83,461 93,440" class="bolt-y"/>
+
+<path d="M320,80 Q320,50 390,50 L560,50 Q590,50 590,80 L590,120 Q590,150 560,150 L370,150 L330,180 L345,150 L350,150 Q320,150 320,120 Z" class="speech-bg"/>
+<text x="455" y="90" text-anchor="middle" class="st" font-size="15" font-weight="500">The cloud went offline.</text>
+<text x="455" y="112" text-anchor="middle" class="st" font-size="15" font-weight="500">My grill didn't.</text>
+<text x="455" y="138" text-anchor="middle" class="st" font-size="12" font-style="italic" opacity="0.6">— local control forever</text>
+
+<text x="340" y="480" text-anchor="middle" class="name-big">PAPACORN</text>
+<text x="340" y="505" text-anchor="middle" class="tag">Grillmaster · Solar hoarder · HA addict</text>
+<text x="340" y="525" text-anchor="middle" class="sub">20+ years of making packets go where they belong</text>
+
+</svg>
