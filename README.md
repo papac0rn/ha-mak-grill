@@ -1,12 +1,34 @@
 # MAK Grill — Home Assistant Integration
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
+[![GitHub release](https://img.shields.io/github/v/release/papac0rn/ha-mak-grill)](https://github.com/papac0rn/ha-mak-grill/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Local-push Home Assistant integration for **MAK Pellet Boss WiFi** grills. No cloud dependency — the grill talks directly to your HA instance over your LAN.
 
+> **MAK Grills has closed its doors**, but your grill still works. This integration keeps your Pellet Boss WiFi connected — locally, forever — with no cloud required.
+
 ## How it works
 
-The Pellet Boss WiFi controller POSTs telemetry to `makgrillsmobile.com/GrillService/Service` every few seconds while the grill is running. This integration registers that same HTTP endpoint on your Home Assistant instance. A local DNS rewrite redirects the grill's traffic to HA instead of the MAK cloud, giving you real-time local control.
+The Pellet Boss WiFi controller POSTs telemetry to `makgrillsmobile.com` every few seconds while running. This integration registers that same HTTP endpoint on your Home Assistant instance. A local DNS rewrite redirects the grill's traffic to HA instead of the (now-defunct) MAK cloud, giving you real-time local control with zero internet dependency.
+
+```
+┌──────────┐   POST /GrillService/Service   ┌──────────────────┐
+│ MAK Grill │ ─────────────────────────────► │ Home Assistant    │
+│ Pellet    │ ◄───────────────────────────── │ (your LAN)       │
+│ Boss WiFi │   setPoint, cookMode, power    │                  │
+└──────────┘                                 └──────────────────┘
+     DNS rewrite: makgrillsmobile.com → your HA IP
+```
+
+## Features
+
+- **Real-time telemetry** — pit temp, 3 meat probes, power state, grill flags
+- **Full control** — setpoint, cook mode (Smoke/Grill/Sear), zone probe, power on/off
+- **Safety** — flameout detection, cooldown interlock, auto-sync setpoint from pit temp
+- **Diagnostics** — last seen timestamp, POST count, grill ID, raw flags
+- **Local push** — no polling, no cloud, no latency
+- **60-second timeout** — no more flickering disconnected status between slow POSTs
 
 ## Entities
 
@@ -17,7 +39,9 @@ The Pellet Boss WiFi controller POSTs telemetry to `makgrillsmobile.com/GrillSer
 | Power State | Sensor | Reported power state from grill |
 | Grill ID | Sensor | Grill serial identifier |
 | Flags | Sensor | Raw grill status flags |
-| Connected | Binary Sensor | Whether the grill is actively posting (15s timeout) |
+| Last Seen | Sensor | Timestamp of last grill POST |
+| Post Count | Sensor | Total POSTs received this session |
+| Connected | Binary Sensor | Whether the grill is actively posting |
 | Flameout | Binary Sensor | Flameout detection (pit temp stays 35°F below setpoint for 8 min) |
 | At Setpoint | Binary Sensor | Grill has reached target temperature |
 | Setpoint | Number | Target temperature (150–500°F, writable) |
@@ -51,6 +75,8 @@ Point `makgrillsmobile.com` to your Home Assistant IP on your router. The Pellet
 
 **Example (Pi-hole / AdGuard Home):**
 - Add a DNS rewrite: `makgrillsmobile.com` → your HA IP
+
+**Pro tip:** If your grill is on a separate IoT VLAN, consider adding a firewall rule to block the grill from reaching external DNS servers. This forces it to use your router's DNS (with the rewrite) and makes the connection bulletproof.
 
 ### 2. Add the integration
 
@@ -87,9 +113,16 @@ The integration responds with a quoted command string that sets the grill's oper
 "setPoint=225&potStatus=&cookMode=1&zoneProbe=1&power=1"
 ```
 
+## Safety features
+
+- **Auto-sync setpoint**: On first connection, the integration syncs the HA setpoint to the grill's actual pit temperature — no more accidentally commanding 500°F when the grill is at 225°F
+- **User-set tracking**: The integration only sends commands you explicitly set in HA. It never overrides the grill's own settings unless you ask it to.
+- **Cooldown interlock**: You can't power on a grill that's in cooldown mode
+- **Flameout detection**: Alerts if pit temp stays 35°F+ below setpoint for 8 minutes
+
 ## Credits
 
-- Protocol based on [mak-controller](https://github.com/bawilson2/mak-controller) by @bawilson2
+- **[bawilson2](https://github.com/bawilson2)** — Original protocol reverse-engineering and [mak-controller](https://github.com/bawilson2/mak-controller) Docker container that proved local control was possible. This integration wouldn't exist without that groundwork.
 - Built with [Claude Code](https://claude.com/claude-code)
 
 ## License
