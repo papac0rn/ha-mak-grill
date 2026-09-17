@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import time
+from datetime import datetime, timezone
 from typing import Any
 
 from homeassistant.core import HomeAssistant, callback
@@ -30,19 +31,28 @@ class GrillCoordinator:
         }
 
         self.grill_command: dict[str, Any] = {
-            "setPoint": 175,
+            "setPoint": 225,
             "potStatus": "",
             "cookMode": 1,
             "zoneProbe": 1,
             "power": 1,
         }
 
+        self._user_set_commands: set[str] = set()
+        self._setpoint_synced: bool = False
+
         self.last_seen: float = 0.0
+        self.last_seen_utc: datetime | None = None
+        self.post_count: int = 0
         self._prev_flags: str | None = None
         self._flameout_start: float | None = None
         self.flameout_triggered: bool = False
         self._listeners: list = []
         self._timeout_unsub: callable | None = None
+
+    def mark_user_set(self, key: str) -> None:
+        """Mark a command parameter as explicitly set by the user via HA."""
+        self._user_set_commands.add(key)
 
     @property
     def connected(self) -> bool:
@@ -81,8 +91,12 @@ class GrillCoordinator:
 
     def process_post(self, form_data: dict[str, str]) -> str:
         """Handle an inbound POST from the Pellet Boss. Returns command payload."""
+        _LOGGER.debug("Grill POST raw fields: %s", dict(form_data))
+
         now = time.monotonic()
         self.last_seen = now
+        self.last_seen_utc = datetime.now(timezone.utc)
+        self.post_count += 1
 
         self.grill_state["grill_id"] = form_data.get("GrillId", "Unknown")
         self.grill_state["temp"] = self._parse_val(form_data.get("Temp"))
@@ -91,6 +105,17 @@ class GrillCoordinator:
         self.grill_state["probe2"] = self._parse_val(form_data.get("Probe2"))
         self.grill_state["probe3"] = self._parse_val(form_data.get("Probe3"))
         self.grill_state["flags"] = form_data.get("GrillFlags", "")
+
+        if not self._setpoint_synced and "setPoint" not in self._user_set_commands:
+            pit = self.grill_state.get("temp")
+            reported_pwr = (self.grill_state.get("power") or "OFF").upper()
+            if pit is not None and pit > 100 and reported_pwr == "ON":
+                self.grill_command["setPoint"] = int(pit)
+                self._setpoint_synced = True
+                _LOGGER.info(
+                    "Auto-synced setpoint to pit temp %s°F (user has not set it)",
+                    int(pit),
+                )
 
         new_flags = self.grill_state["flags"]
         if self._prev_flags is not None and new_flags != self._prev_flags:
@@ -142,13 +167,15 @@ class GrillCoordinator:
 
     def _build_response(self) -> str:
         cmd = self.grill_command
-        return (
+        resp = (
             f'"setPoint={cmd["setPoint"]}'
             f'&potStatus={cmd["potStatus"]}'
             f'&cookMode={cmd["cookMode"]}'
             f'&zoneProbe={cmd["zoneProbe"]}'
             f'&power={cmd["power"]}"'
         )
+        _LOGGER.debug("Grill response: %s (user-set: %s)", resp, self._user_set_commands)
+        return resp
 
     @staticmethod
     def _parse_val(raw) -> float | None:

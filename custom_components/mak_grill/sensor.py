@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
@@ -36,6 +38,8 @@ async def async_setup_entry(
     entities.append(GrillPowerStateSensor(coordinator, entry, name))
     entities.append(GrillFlagsSensor(coordinator, entry, name))
     entities.append(GrillIdSensor(coordinator, entry, name))
+    entities.append(GrillLastSeenSensor(coordinator, entry, name))
+    entities.append(GrillPostCountSensor(coordinator, entry, name))
 
     async_add_entities(entities)
 
@@ -140,3 +144,37 @@ class GrillIdSensor(GrillSensorBase):
     @property
     def native_value(self) -> str:
         return self._coordinator.grill_state.get("grill_id", "Unknown")
+
+
+class GrillLastSeenSensor(GrillSensorBase):
+    _attr_name = "Last Seen"
+    _attr_icon = "mdi:clock-check-outline"
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(
+        self, coordinator: GrillCoordinator, entry: ConfigEntry, grill_name: str
+    ) -> None:
+        super().__init__(coordinator, entry, grill_name)
+        self._attr_unique_id = f"{entry.entry_id}_last_seen"
+
+    @property
+    def native_value(self) -> datetime | None:
+        return self._coordinator.last_seen_utc
+
+
+class GrillPostCountSensor(GrillSensorBase):
+    _attr_name = "Post Count"
+    _attr_icon = "mdi:counter"
+    _attr_state_class = SensorStateClass.TOTAL_INCREASING
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(
+        self, coordinator: GrillCoordinator, entry: ConfigEntry, grill_name: str
+    ) -> None:
+        super().__init__(coordinator, entry, grill_name)
+        self._attr_unique_id = f"{entry.entry_id}_post_count"
+
+    @property
+    def native_value(self) -> int:
+        return self._coordinator.post_count

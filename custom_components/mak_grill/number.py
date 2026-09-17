@@ -51,6 +51,7 @@ class GrillSetpointNumber(NumberEntity):
         return self._coordinator.grill_command.get("setPoint", 175)
 
     async def async_set_native_value(self, value: float) -> None:
+        self._coordinator.mark_user_set("setPoint")
         self._coordinator.grill_command["setPoint"] = int(value)
         self.async_write_ha_state()
 

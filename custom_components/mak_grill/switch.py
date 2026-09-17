@@ -51,10 +51,12 @@ class GrillPowerSwitch(SwitchEntity):
         )
         if is_cooldown:
             return
+        self._coordinator.mark_user_set("power")
         self._coordinator.grill_command["power"] = 1
         self.async_write_ha_state()
 
     async def async_turn_off(self, **kwargs) -> None:
+        self._coordinator.mark_user_set("power")
         self._coordinator.grill_command["power"] = 0
         self.async_write_ha_state()
 

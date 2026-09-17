@@ -72,6 +72,7 @@ class GrillCookModeSelect(GrillSelectBase):
     async def async_select_option(self, option: str) -> None:
         int_val = self._str_to_int.get(option)
         if int_val is not None:
+            self._coordinator.mark_user_set("cookMode")
             self._coordinator.grill_command["cookMode"] = int_val
             self.async_write_ha_state()
 
@@ -97,5 +98,6 @@ class GrillZoneProbeSelect(GrillSelectBase):
     async def async_select_option(self, option: str) -> None:
         int_val = self._str_to_int.get(option)
         if int_val is not None:
+            self._coordinator.mark_user_set("zoneProbe")
             self._coordinator.grill_command["zoneProbe"] = int_val
             self.async_write_ha_state()
