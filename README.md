@@ -22,6 +22,14 @@ The Pellet Boss WiFi controller POSTs telemetry to `makgrillsmobile.com` every f
      DNS rewrite: makgrillsmobile.com → your HA IP
 ```
 
+## Screenshots
+
+<p align="center">
+  <img src="images/dashboard.png" alt="MAK Grill Dashboard - Controls" width="350"/>
+  &nbsp;&nbsp;
+  <img src="images/dashboard-history.png" alt="MAK Grill Dashboard - History & Diagnostics" width="350"/>
+</p>
+
 ## Features
 
 - **Real-time telemetry** — pit temp, 3 meat probes, power state, grill flags
