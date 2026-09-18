@@ -57,6 +57,13 @@ The Pellet Boss WiFi controller POSTs telemetry to `makgrillsmobile.com` every f
 | Power | Switch | Power on/off (with cooldown interlock) |
 | Cook Mode | Select | Smoke / Grill / Sear |
 | Zone Probe | Select | Which probe controls the zone |
+| Create Dashboard | Button | One-press setup — creates a complete MAK Grill dashboard in your sidebar |
+
+## Dashboard
+
+After installing, go to **Settings → Devices → MAK Grill** and press the **Create Dashboard** button. A fully configured dashboard appears in your sidebar with pit temperature gauge, controls, probes, cook history graph, status, and safety/diagnostics cards.
+
+Want to build your own instead? See the [Dashboard Guide](https://github.com/papac0rn/ha-mak-grill/wiki/Dashboard-Guide) for copy-paste YAML for each card.
 
 ## Installation
 
