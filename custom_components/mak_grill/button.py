@@ -64,25 +64,43 @@ def _build_dashboard_config(
                 "path": "overview",
                 "cards": [
                     {
-                        "type": "conditional",
-                        "conditions": [
-                            {"entity": eid("binary_sensor", "connected"), "state": "on"}
+                        "type": "vertical-stack",
+                        "cards": [
+                            {
+                                "type": "conditional",
+                                "conditions": [
+                                    {"entity": eid("binary_sensor", "connected"), "state": "off"}
+                                ],
+                                "card": {
+                                    "type": "entities",
+                                    "title": "Pit Temperature",
+                                    "entities": [
+                                        {"entity": eid("sensor", "temp"), "name": "Temperature", "icon": "mdi:thermometer-off"},
+                                    ],
+                                },
+                            },
+                            {
+                                "type": "conditional",
+                                "conditions": [
+                                    {"entity": eid("binary_sensor", "connected"), "state": "on"}
+                                ],
+                                "card": {
+                                    "type": "gauge",
+                                    "entity": eid("sensor", "temp"),
+                                    "name": "Pit Temperature",
+                                    "unit": "°F",
+                                    "needle": True,
+                                    "min": 0,
+                                    "max": 600,
+                                    "segments": [
+                                        {"from": 0, "color": "#43a047"},
+                                        {"from": 200, "color": "#ffa600"},
+                                        {"from": 350, "color": "#db4437"},
+                                        {"from": 450, "color": "#9c27b0"},
+                                    ],
+                                },
+                            },
                         ],
-                        "card": {
-                            "type": "gauge",
-                            "entity": eid("sensor", "temp"),
-                            "name": "Pit Temperature",
-                            "unit": "°F",
-                            "needle": True,
-                            "min": 0,
-                            "max": 600,
-                            "segments": [
-                                {"from": 0, "color": "#43a047"},
-                                {"from": 200, "color": "#ffa600"},
-                                {"from": 350, "color": "#db4437"},
-                                {"from": 450, "color": "#9c27b0"},
-                            ],
-                        },
                     },
                     {
                         "type": "entities",
