@@ -167,15 +167,15 @@ class CreateDashboardButton(ButtonEntity):
             _LOGGER.error("Lovelace component not loaded")
             return
 
-        dashboards = lovelace_data.get("dashboards", {})
+        dashboards = lovelace_data.dashboards
 
         if url_path not in dashboards:
-            storage_collection = lovelace_data.get("dashboard_collection")
-            if storage_collection is None:
+            collection = lovelace_data.dashboard_collection
+            if collection is None:
                 _LOGGER.error("Cannot create dashboard: no dashboard collection")
                 return
 
-            await storage_collection.async_create_item({
+            await collection.async_create_item({
                 "url_path": url_path,
                 "title": self._grill_name,
                 "icon": "mdi:grill",
@@ -184,7 +184,7 @@ class CreateDashboardButton(ButtonEntity):
             })
             _LOGGER.info("Created '%s' dashboard", self._grill_name)
 
-        dashboards = lovelace_data.get("dashboards", {})
+        dashboards = lovelace_data.dashboards
         dashboard = dashboards.get(url_path)
         if dashboard is None:
             _LOGGER.error("Dashboard '%s' not found after creation", url_path)
