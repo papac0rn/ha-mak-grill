@@ -13,7 +13,7 @@ from .coordinator import GrillCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS = ["sensor", "binary_sensor", "number", "switch", "select"]
+PLATFORMS = ["sensor", "binary_sensor", "number", "switch", "select", "button"]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
