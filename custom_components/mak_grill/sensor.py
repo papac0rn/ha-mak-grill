@@ -95,8 +95,9 @@ class GrillTempSensor(GrillSensorBase):
         self._attr_unique_id = f"{entry.entry_id}_{key}"
 
     @property
-    def native_value(self) -> float | None:
-        return self._coordinator.grill_state.get(self._key)
+    def native_value(self) -> float:
+        val = self._coordinator.grill_state.get(self._key)
+        return val if val is not None else 0.0
 
 
 class GrillPowerStateSensor(GrillSensorBase):
