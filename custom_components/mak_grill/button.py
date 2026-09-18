@@ -64,42 +64,18 @@ def _build_dashboard_config(
                 "path": "overview",
                 "cards": [
                     {
-                        "type": "vertical-stack",
-                        "cards": [
-                            {
-                                "type": "conditional",
-                                "conditions": [
-                                    {"entity": eid("binary_sensor", "connected"), "state": "off"}
-                                ],
-                                "card": {
-                                    "type": "entities",
-                                    "title": "Pit Temperature",
-                                    "entities": [
-                                        {"entity": eid("sensor", "temp"), "name": "Temperature", "icon": "mdi:thermometer-off"},
-                                    ],
-                                },
-                            },
-                            {
-                                "type": "conditional",
-                                "conditions": [
-                                    {"entity": eid("binary_sensor", "connected"), "state": "on"}
-                                ],
-                                "card": {
-                                    "type": "gauge",
-                                    "entity": eid("sensor", "temp"),
-                                    "name": "Pit Temperature",
-                                    "unit": "°F",
-                                    "needle": True,
-                                    "min": 0,
-                                    "max": 600,
-                                    "segments": [
-                                        {"from": 0, "color": "#43a047"},
-                                        {"from": 200, "color": "#ffa600"},
-                                        {"from": 350, "color": "#db4437"},
-                                        {"from": 450, "color": "#9c27b0"},
-                                    ],
-                                },
-                            },
+                        "type": "gauge",
+                        "entity": eid("sensor", "temp"),
+                        "name": "Pit Temperature",
+                        "unit": "°F",
+                        "needle": True,
+                        "min": 0,
+                        "max": 600,
+                        "segments": [
+                            {"from": 0, "color": "#43a047"},
+                            {"from": 200, "color": "#ffa600"},
+                            {"from": 350, "color": "#db4437"},
+                            {"from": 450, "color": "#9c27b0"},
                         ],
                     },
                     {
@@ -193,13 +169,32 @@ class CreateDashboardButton(ButtonEntity):
             return
 
         dashboards = lovelace_data.dashboards
+        collection = lovelace_data.dashboard_collection
+        if collection is None:
+            _LOGGER.error("Cannot create dashboard: no dashboard collection")
+            return
 
+        if url_path in dashboards:
+            _LOGGER.info(
+                "Dashboard '%s' already exists — removing old one before recreating",
+                url_path,
+            )
+            try:
+                old_item = None
+                for item in collection.async_items():
+                    if item.get("url_path") == url_path:
+                        old_item = item
+                        break
+                if old_item and old_item.get("id"):
+                    await collection.async_delete_item(old_item["id"])
+                    _LOGGER.info("Removed old '%s' dashboard", url_path)
+            except Exception:
+                _LOGGER.warning(
+                    "Could not remove old dashboard — will overwrite config instead"
+                )
+
+        dashboards = lovelace_data.dashboards
         if url_path not in dashboards:
-            collection = lovelace_data.dashboard_collection
-            if collection is None:
-                _LOGGER.error("Cannot create dashboard: no dashboard collection")
-                return
-
             await collection.async_create_item({
                 "url_path": url_path,
                 "title": self._grill_name,
@@ -218,5 +213,8 @@ class CreateDashboardButton(ButtonEntity):
         registry = er.async_get(hass)
         config = _build_dashboard_config(registry, self._grill_name, self._entry.entry_id)
         await dashboard.async_save(config)
-        _LOGGER.info("Saved %s dashboard config with %d cards",
-                      self._grill_name, len(config["views"][0]["cards"]))
+        _LOGGER.info(
+            "Saved %s dashboard with %d cards — open it from the sidebar",
+            self._grill_name,
+            len(config["views"][0]["cards"]),
+        )
