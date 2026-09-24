@@ -42,7 +42,10 @@ class GrillPowerSwitch(SwitchEntity):
 
     @property
     def is_on(self) -> bool:
-        return self._coordinator.grill_command.get("power", 1) == 1
+        # grill_command["power"] defaults to 1 and resets to 1 after cooldown, so it can't be the displayed state
+        if not self._coordinator.connected or self._coordinator.grill_command.get("power") == 0:
+            return False
+        return (self._coordinator.grill_state.get("power") or "OFF").upper() == "ON"
 
     async def async_turn_on(self, **kwargs) -> None:
         reported_pwr = (self._coordinator.grill_state.get("power") or "OFF").upper()
