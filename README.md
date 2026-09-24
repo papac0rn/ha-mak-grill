@@ -140,6 +140,7 @@ The integration responds with a quoted command string that sets the grill's oper
 
 | Version | Changes |
 |---------|---------|
+| **v1.3.1** | Honest temperatures: pit and probe sensors read unknown (not 0°F or a frozen last value) when the grill is off or disconnected, and unplugged probes read unknown instead of 0°F. Dashboard shows a status card in place of the gauge while the grill is off. Power switch now reflects the grill's real state (including ignition) |
 | **v1.3.0** | Create Dashboard button — one-press sidebar dashboard setup; gauge shows 0°F instead of error when grill offline |
 | **v1.2.0** | Flameout detection, at-setpoint indicator, 60-second timeout, auto-sync setpoint on first connection |
 | **v1.1.0** | Full grill control — setpoint, cook mode, zone probe, power switch with cooldown interlock |
@@ -157,7 +158,7 @@ The integration responds with a quoted command string that sets the grill's oper
 | Grill not connecting / entities stay "unknown" | DNS rewrite not set up or not resolving | Verify `makgrillsmobile.com` resolves to your HA IP: `nslookup makgrillsmobile.com` from the grill's network |
 | Entities show "unknown" but grill is on | Grill hasn't sent its first POST yet | Wait 10–15 seconds after power-on; check `binary_sensor.mak_grill_connected` |
 | Flameout alert on startup | Normal — pit temp is cold and below setpoint | The alert clears once the grill heats up or after 8 minutes of normal operation |
-| Dashboard gauge shows 0°F | Grill is powered off or disconnected | Expected behavior (v1.3.0+) — gauge shows 0 instead of an error when no data is available |
+| Temperatures read "unknown" | Grill is powered off or disconnected, or the probe is unplugged | Expected behavior (v1.3.1+). The generated dashboard hides the gauge and shows Connected / Power State until the grill posts again |
 | Grill on different VLAN can't reach HA | Firewall blocking cross-VLAN traffic on port 80 | Add a firewall rule allowing the grill's subnet to reach HA's IP on port 80 |
 
 For more help, see the [Troubleshooting wiki page](https://github.com/papac0rn/ha-mak-grill/wiki/Troubleshooting) or [open an issue](https://github.com/papac0rn/ha-mak-grill/issues).

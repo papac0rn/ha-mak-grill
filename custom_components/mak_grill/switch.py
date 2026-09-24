@@ -45,7 +45,9 @@ class GrillPowerSwitch(SwitchEntity):
         # grill_command["power"] defaults to 1 and resets to 1 after cooldown, so it can't be the displayed state
         if not self._coordinator.connected or self._coordinator.grill_command.get("power") == 0:
             return False
-        return (self._coordinator.grill_state.get("power") or "OFF").upper() == "ON"
+        reported = (self._coordinator.grill_state.get("power") or "").upper()
+        # any running state counts, including the undocumented START sent during ignition
+        return reported not in ("", "OFF") and "COOL" not in reported and "CD" not in reported
 
     async def async_turn_on(self, **kwargs) -> None:
         reported_pwr = (self._coordinator.grill_state.get("power") or "OFF").upper()

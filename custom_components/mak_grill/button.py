@@ -64,19 +64,47 @@ def _build_dashboard_config(
                 "path": "overview",
                 "cards": [
                     {
-                        "type": "gauge",
-                        "entity": eid("sensor", "temp"),
-                        "name": "Pit Temperature",
-                        "unit": "°F",
-                        "needle": True,
-                        "min": 0,
-                        "max": 600,
-                        "segments": [
-                            {"from": 0, "color": "#43a047"},
-                            {"from": 200, "color": "#ffa600"},
-                            {"from": 350, "color": "#db4437"},
-                            {"from": 450, "color": "#9c27b0"},
+                        "type": "conditional",
+                        "conditions": [
+                            {
+                                "condition": "state",
+                                "entity": eid("sensor", "temp"),
+                                "state_not": ["unknown", "unavailable"],
+                            }
                         ],
+                        "card": {
+                            "type": "gauge",
+                            "entity": eid("sensor", "temp"),
+                            "name": "Pit Temperature",
+                            "unit": "°F",
+                            "needle": True,
+                            "min": 0,
+                            "max": 600,
+                            "segments": [
+                                {"from": 0, "color": "#43a047"},
+                                {"from": 200, "color": "#ffa600"},
+                                {"from": 350, "color": "#db4437"},
+                                {"from": 450, "color": "#9c27b0"},
+                            ],
+                        },
+                    },
+                    {
+                        "type": "conditional",
+                        "conditions": [
+                            {
+                                "condition": "state",
+                                "entity": eid("sensor", "temp"),
+                                "state": ["unknown", "unavailable"],
+                            }
+                        ],
+                        "card": {
+                            "type": "entities",
+                            "title": "Pit Temperature",
+                            "entities": [
+                                {"entity": eid("binary_sensor", "connected"), "name": "Connected"},
+                                {"entity": eid("sensor", "power_state"), "name": "Power State"},
+                            ],
+                        },
                     },
                     {
                         "type": "entities",

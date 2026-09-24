@@ -95,9 +95,14 @@ class GrillTempSensor(GrillSensorBase):
         self._attr_unique_id = f"{entry.entry_id}_{key}"
 
     @property
-    def native_value(self) -> float:
+    def native_value(self) -> float | None:
+        if not self._coordinator.connected:
+            return None
         val = self._coordinator.grill_state.get(self._key)
-        return val if val is not None else 0.0
+        # the Pellet Boss reports 0 for an unplugged probe; a pit reading of 0 is real
+        if self._key.startswith("probe") and val == 0:
+            return None
+        return val
 
 
 class GrillPowerStateSensor(GrillSensorBase):
