@@ -8,7 +8,13 @@ from typing import Any
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.event import async_call_later
 
-from .const import GRILL_TIMEOUT_SECONDS, FLAMEOUT_THRESHOLD_F, FLAMEOUT_DURATION_SECONDS
+from .const import (
+    GRILL_TIMEOUT_SECONDS,
+    FLAMEOUT_THRESHOLD_F,
+    FLAMEOUT_DURATION_SECONDS,
+    FLAMEOUT_MAX_HOLD_F,
+    FLAMEOUT_WARMUP_GRACE_SECONDS,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -47,6 +53,10 @@ class GrillCoordinator:
         self._prev_flags: str | None = None
         self._flameout_start: float | None = None
         self.flameout_triggered: bool = False
+        # Warm-up grace: flameout is only judged once the pit has reached the target band
+        self._flameout_armed: bool = False
+        self._flameout_target: int | None = None
+        self._warmup_start: float | None = None
         self._listeners: list = []
         self._timeout_unsub: callable | None = None
 
@@ -136,20 +146,49 @@ class GrillCoordinator:
         pit_temp = self.grill_state.get("temp")
         setpoint = self.grill_command.get("setPoint")
 
-        if reported_pwr == "ON" and pit_temp is not None and setpoint is not None:
-            if pit_temp < (setpoint - FLAMEOUT_THRESHOLD_F):
-                if self._flameout_start is None:
-                    self._flameout_start = now
-                elif (now - self._flameout_start) >= FLAMEOUT_DURATION_SECONDS:
-                    if not self.flameout_triggered:
-                        self.flameout_triggered = True
-                        _LOGGER.warning(
-                            "Flameout detected: pit %s°F, setpoint %s°F",
-                            pit_temp, setpoint,
-                        )
-            else:
-                self._flameout_start = None
+        if reported_pwr != "ON" or pit_temp is None or setpoint is None:
+            # Not cooking: the next cook starts with a fresh warm-up grace
+            self._flameout_start = None
+            self.flameout_triggered = False
+            self._flameout_armed = False
+            self._flameout_target = None
+            self._warmup_start = None
+            return
+
+        target = min(int(setpoint), FLAMEOUT_MAX_HOLD_F)
+        if target != self._flameout_target:
+            # New cook or new setpoint: wait for the pit to come up to it again
+            self._flameout_target = target
+            self._flameout_armed = False
+            self._flameout_start = None
+            self.flameout_triggered = False
+            self._warmup_start = now
+
+        low = target - FLAMEOUT_THRESHOLD_F
+
+        if not self._flameout_armed:
+            if pit_temp >= low:
+                self._flameout_armed = True
                 self.flameout_triggered = False
+            elif (now - self._warmup_start) >= FLAMEOUT_WARMUP_GRACE_SECONDS:
+                if not self.flameout_triggered:
+                    self.flameout_triggered = True
+                    _LOGGER.warning(
+                        "Flameout detected: pit %s°F never reached %s°F within %d min",
+                        pit_temp, target, FLAMEOUT_WARMUP_GRACE_SECONDS // 60,
+                    )
+            return
+
+        if pit_temp < low:
+            if self._flameout_start is None:
+                self._flameout_start = now
+            elif (now - self._flameout_start) >= FLAMEOUT_DURATION_SECONDS:
+                if not self.flameout_triggered:
+                    self.flameout_triggered = True
+                    _LOGGER.warning(
+                        "Flameout detected: pit %s°F, setpoint %s°F (judged against %s°F)",
+                        pit_temp, setpoint, target,
+                    )
         else:
             self._flameout_start = None
             self.flameout_triggered = False
