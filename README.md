@@ -140,7 +140,7 @@ The integration responds with a quoted command string that sets the grill's oper
 
 `binary_sensor.mak_grill_at_setpoint` follows the grill's own `ATSET` flag. A grill set above about 450°F may never report it, so the example below also fires when the pit gets within 5°F of the setpoint (capped at 450°F).
 
-It sends one alert per setpoint per cook, so lid-open dips on a long smoke don't re-alert. Create a toggle helper named **MAK Grill set point alert sent** first, then replace `mobile_app_your_phone` with your phone's notify service. On Android, `channel: alarm_stream` makes it beep even when the phone is on silent.
+It sends one alert per setpoint per cook, so lid-open dips on a long smoke don't re-alert. Power State keeps its last value (for example `COOLDOWN`) between cooks, so the alert re-arms when the grill goes to `START`, or to `ON` from any other state. Create a toggle helper named **MAK Grill set point alert sent** first, then replace `mobile_app_your_phone` with your phone's notify service. On Android, `channel: alarm_stream` makes it beep even when the phone is on silent.
 
 ```yaml
 alias: MAK Grill - at set point alert
@@ -148,8 +148,12 @@ mode: queued
 triggers:
   - trigger: state
     entity_id: sensor.mak_grill_power_state
-    from: "OFF"
-    not_to: [unknown, unavailable]
+    to: "START"
+    id: rearm
+  - trigger: state
+    entity_id: sensor.mak_grill_power_state
+    to: "ON"
+    not_from: ["ON", unknown, unavailable]
     id: rearm
   - trigger: state
     entity_id: number.mak_grill_setpoint
