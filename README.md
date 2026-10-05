@@ -51,7 +51,7 @@ The Pellet Boss WiFi controller POSTs telemetry to `makgrillsmobile.com` every f
 | Last Seen | Sensor | Timestamp of last grill POST |
 | Post Count | Sensor | Total POSTs received this session |
 | Connected | Binary Sensor | Whether the grill is actively posting |
-| Flameout | Binary Sensor | Flameout detection (pit temp stays 35°F below setpoint for 8 min) |
+| Flameout | Binary Sensor | Flameout detection (once up to temperature, pit stays 35°F below the setpoint, capped at 450°F, for 8 min; or the pit never comes up to temperature within 45 min) |
 | At Setpoint | Binary Sensor | Grill has reached target temperature |
 | Setpoint | Number | Target temperature (150–500°F, writable) |
 | Power | Switch | Power on/off (with cooldown interlock) |
@@ -134,12 +134,81 @@ The integration responds with a quoted command string that sets the grill's oper
 - **Auto-sync setpoint**: On first connection, the integration syncs the HA setpoint to the grill's actual pit temperature — no more accidentally commanding 500°F when the grill is at 225°F
 - **User-set tracking**: The integration only sends commands you explicitly set in HA. It never overrides the grill's own settings unless you ask it to.
 - **Cooldown interlock**: You can't power on a grill that's in cooldown mode
-- **Flameout detection**: Alerts if pit temp stays 35°F+ below setpoint for 8 minutes
+- **Flameout detection**: Once the grill has come up to temperature, alerts if the pit stays 35°F+ below the setpoint for 8 minutes. A MAK holds about 450°F at most, so a higher setpoint is judged against 450°F. A cook that never reaches temperature within 45 minutes (a failed light) also counts as a flameout.
+
+## Phone alert when the grill is up to temp
+
+`binary_sensor.mak_grill_at_setpoint` follows the grill's own `ATSET` flag. A grill set above about 450°F may never report it, so the example below also fires when the pit gets within 5°F of the setpoint (capped at 450°F).
+
+It sends one alert per setpoint per cook, so lid-open dips on a long smoke don't re-alert. Create a toggle helper named **MAK Grill set point alert sent** first, then replace `mobile_app_your_phone` with your phone's notify service. On Android, `channel: alarm_stream` makes it beep even when the phone is on silent.
+
+```yaml
+alias: MAK Grill - at set point alert
+mode: queued
+triggers:
+  - trigger: state
+    entity_id: sensor.mak_grill_power_state
+    from: "OFF"
+    not_to: [unknown, unavailable]
+    id: rearm
+  - trigger: state
+    entity_id: number.mak_grill_setpoint
+    not_from: [unknown, unavailable]
+    not_to: [unknown, unavailable]
+    for: { seconds: 15 }
+    id: rearm
+  - trigger: state
+    entity_id: binary_sensor.mak_grill_at_setpoint
+    from: "off"
+    to: "on"
+    id: atset
+  - trigger: template
+    value_template: >
+      {% set raw = states('number.mak_grill_setpoint') | float(0) %}
+      {% set sp = [raw, 450] | min %}
+      {{ raw >= 160 and is_state('sensor.mak_grill_power_state', 'ON')
+         and states('sensor.mak_grill_temperature') | is_number
+         and (states('sensor.mak_grill_temperature') | float) >= sp - 5 }}
+    for: { seconds: 30 }
+    id: temp
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: rearm
+        sequence:
+          - action: input_boolean.turn_off
+            target: { entity_id: input_boolean.mak_grill_set_point_alert_sent }
+      - conditions:
+          - condition: trigger
+            id: [atset, temp]
+          - condition: state
+            entity_id: sensor.mak_grill_power_state
+            state: "ON"
+          - condition: state
+            entity_id: input_boolean.mak_grill_set_point_alert_sent
+            state: "off"
+        sequence:
+          - action: input_boolean.turn_on
+            target: { entity_id: input_boolean.mak_grill_set_point_alert_sent }
+          - action: notify.mobile_app_your_phone
+            data:
+              title: MAK Grill is up to temp
+              message: >
+                Pit {{ states('sensor.mak_grill_temperature') | float(0) | round(0) | int }}°F
+                (setpoint {{ states('number.mak_grill_setpoint') | int(0) }}°F)
+              data:
+                ttl: 0
+                priority: high
+                channel: alarm_stream
+                tag: mak_grill_setpoint
+```
 
 ## What's new
 
 | Version | Changes |
 |---------|---------|
+| **v1.3.2** | Flameout no longer false-alarms while the grill warms up: it only counts once the pit has reached temperature. A setpoint above 450°F is judged against 450°F, what a MAK actually holds. A cook that never comes up to temperature within 45 minutes is reported as a flameout. README adds an example "up to temp" phone alert |
 | **v1.3.1** | Honest temperatures: pit and probe sensors read unknown (not 0°F or a frozen last value) when the grill is off or disconnected, and unplugged probes read unknown instead of 0°F. Dashboard shows a status card in place of the gauge while the grill is off. Power switch now reflects the grill's real state (including ignition) |
 | **v1.3.0** | Create Dashboard button — one-press sidebar dashboard setup; gauge shows 0°F instead of error when grill offline |
 | **v1.2.0** | Flameout detection, at-setpoint indicator, 60-second timeout, auto-sync setpoint on first connection |
@@ -157,7 +226,8 @@ The integration responds with a quoted command string that sets the grill's oper
 |---------|-------|-----|
 | Grill not connecting / entities stay "unknown" | DNS rewrite not set up or not resolving | Verify `makgrillsmobile.com` resolves to your HA IP: `nslookup makgrillsmobile.com` from the grill's network |
 | Entities show "unknown" but grill is on | Grill hasn't sent its first POST yet | Wait 10–15 seconds after power-on; check `binary_sensor.mak_grill_connected` |
-| Flameout alert on startup | Normal — pit temp is cold and below setpoint | The alert clears once the grill heats up or after 8 minutes of normal operation |
+| Flameout comes on while the grill is still heating up | v1.3.1 and earlier started the 8-minute flameout timer as soon as the grill reached ON, before it was up to temperature | Fixed in v1.3.2. Update through HACS |
+| Flameout stays on with a setpoint above 450°F | v1.3.1 and earlier compared the pit to the full setpoint, which a MAK can't hold | Fixed in v1.3.2, which judges against 450°F |
 | Temperatures read "unknown" | Grill is powered off or disconnected, or the probe is unplugged | Expected behavior (v1.3.1+). The generated dashboard hides the gauge and shows Connected / Power State until the grill posts again |
 | Grill on different VLAN can't reach HA | Firewall blocking cross-VLAN traffic on port 80 | Add a firewall rule allowing the grill's subnet to reach HA's IP on port 80 |
 
