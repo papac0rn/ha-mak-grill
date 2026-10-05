@@ -208,7 +208,8 @@ actions:
 
 | Version | Changes |
 |---------|---------|
-| **v1.3.2** | Flameout no longer false-alarms while the grill warms up: it only counts once the pit has reached temperature. A setpoint above 450°F is judged against 450°F, what a MAK actually holds. A cook that never comes up to temperature within 45 minutes is reported as a flameout. README adds an example "up to temp" phone alert |
+| **v1.3.3** | Flameout no longer false-alarms while the grill warms up: it only counts once the pit has reached temperature. A setpoint above 450°F is judged against 450°F, what a MAK actually holds. A cook that never comes up to temperature within 45 minutes is reported as a flameout. README adds an example "up to temp" phone alert |
+| v1.3.2 | Published by mistake from the v1.3.1 code. Skip it and install v1.3.3 |
 | **v1.3.1** | Honest temperatures: pit and probe sensors read unknown (not 0°F or a frozen last value) when the grill is off or disconnected, and unplugged probes read unknown instead of 0°F. Dashboard shows a status card in place of the gauge while the grill is off. Power switch now reflects the grill's real state (including ignition) |
 | **v1.3.0** | Create Dashboard button — one-press sidebar dashboard setup; gauge shows 0°F instead of error when grill offline |
 | **v1.2.0** | Flameout detection, at-setpoint indicator, 60-second timeout, auto-sync setpoint on first connection |
@@ -226,8 +227,8 @@ actions:
 |---------|-------|-----|
 | Grill not connecting / entities stay "unknown" | DNS rewrite not set up or not resolving | Verify `makgrillsmobile.com` resolves to your HA IP: `nslookup makgrillsmobile.com` from the grill's network |
 | Entities show "unknown" but grill is on | Grill hasn't sent its first POST yet | Wait 10–15 seconds after power-on; check `binary_sensor.mak_grill_connected` |
-| Flameout comes on while the grill is still heating up | v1.3.1 and earlier started the 8-minute flameout timer as soon as the grill reached ON, before it was up to temperature | Fixed in v1.3.2. Update through HACS |
-| Flameout stays on with a setpoint above 450°F | v1.3.1 and earlier compared the pit to the full setpoint, which a MAK can't hold | Fixed in v1.3.2, which judges against 450°F |
+| Flameout comes on while the grill is still heating up | v1.3.2 and earlier started the 8-minute flameout timer as soon as the grill reached ON, before it was up to temperature | Fixed in v1.3.3. Update through HACS |
+| Flameout stays on with a setpoint above 450°F | v1.3.2 and earlier compared the pit to the full setpoint, which a MAK can't hold | Fixed in v1.3.3, which judges against 450°F |
 | Temperatures read "unknown" | Grill is powered off or disconnected, or the probe is unplugged | Expected behavior (v1.3.1+). The generated dashboard hides the gauge and shows Connected / Power State until the grill posts again |
 | Grill on different VLAN can't reach HA | Firewall blocking cross-VLAN traffic on port 80 | Add a firewall rule allowing the grill's subnet to reach HA's IP on port 80 |
 
