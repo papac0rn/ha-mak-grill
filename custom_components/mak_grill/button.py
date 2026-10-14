@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import inspect
 import logging
+from typing import Any
 
 from homeassistant.components.button import ButtonEntity
 from homeassistant.config_entries import ConfigEntry
@@ -22,6 +24,23 @@ async def async_setup_entry(
     coordinator: GrillCoordinator = hass.data[DOMAIN][entry.entry_id]
     name = entry.data.get(CONF_GRILL_NAME, "MAK Grill")
     async_add_entities([CreateDashboardButton(coordinator, entry, name)])
+
+
+def _dashboards_collection(hass: HomeAssistant) -> Any | None:
+    """The storage collection behind Settings → Dashboards.
+
+    Older Home Assistant kept it on hass.data["lovelace"]; newer versions only hand it to the
+    lovelace/dashboards/* websocket commands, so it is found through the create command's handler.
+    """
+    lovelace = hass.data.get("lovelace")
+    if lovelace is not None and getattr(lovelace, "dashboard_collection", None) is not None:
+        return lovelace.dashboard_collection
+    entry = hass.data.get("websocket_api", {}).get("lovelace/dashboards/create")
+    if not entry:
+        return None
+    handler = inspect.unwrap(entry[0])
+    owner = getattr(handler, "__self__", None)
+    return getattr(owner, "storage_collection", None)
 
 
 def _entity_id(registry: er.EntityRegistry, entry_id: str, platform: str, key: str) -> str | None:
@@ -197,7 +216,7 @@ class CreateDashboardButton(ButtonEntity):
             return
 
         dashboards = lovelace_data.dashboards
-        collection = lovelace_data.dashboard_collection
+        collection = _dashboards_collection(hass)
         if collection is None:
             _LOGGER.error("Cannot create dashboard: no dashboard collection")
             return
