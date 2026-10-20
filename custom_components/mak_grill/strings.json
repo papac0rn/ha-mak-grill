@@ -3,11 +3,35 @@
     "step": {
       "user": {
         "title": "MAK Grill Setup",
-        "description": "Set up your MAK Pellet Boss WiFi grill. The integration registers an HTTP endpoint at /GrillService/Service that receives telemetry from the grill controller.",
+        "description": "Set up your MAK Pellet Boss WiFi grill. The integration answers the grill at /GrillService/Service, and only accepts the grill's own IP address. Give the grill a DHCP reservation on your router so its address doesn't change.",
         "data": {
-          "grill_name": "Grill name"
+          "grill_name": "Grill name",
+          "grill_host": "Grill IP address"
+        },
+        "data_description": {
+          "grill_host": "The grill's IP address on your network, for example 192.168.2.50. Find it in your router's client list."
+        }
+      },
+      "reconfigure": {
+        "title": "Grill IP address",
+        "description": "Only POSTs from this address are accepted. Update it if the grill's IP address changed.",
+        "data": {
+          "grill_host": "Grill IP address"
         }
       }
+    },
+    "error": {
+      "invalid_ip": "Enter an IP address, for example 192.168.2.50"
+    },
+    "abort": {
+      "already_configured": "The MAK Grill is already set up",
+      "reconfigure_successful": "Grill address saved"
+    }
+  },
+  "issues": {
+    "no_grill_address": {
+      "title": "MAK Grill: set the grill's IP address",
+      "description": "Since version 1.4.0 the integration only accepts telemetry from the grill's own IP address, and none is set, so the grill is being ignored. Open Settings → Devices & Services → MAK Grill → ⋮ → Reconfigure and enter the grill's IP address."
     }
   }
 }

@@ -57,11 +57,125 @@ The Pellet Boss WiFi controller POSTs telemetry to `makgrillsmobile.com` every f
 | Power | Switch | Power on/off (with cooldown interlock) |
 | Cook Mode | Select | Smoke / Grill / Sear |
 | Zone Probe | Select | Which probe controls the zone |
-| Create Dashboard | Button | One-press setup — creates a complete MAK Grill dashboard in your sidebar |
 
 ## Dashboard
 
-After installing, go to **Settings → Devices → MAK Grill** and press the **Create Dashboard** button. A fully configured dashboard appears in your sidebar with pit temperature gauge, controls, probes, cook history graph, status, and safety/diagnostics cards.
+A ready-made dashboard with a pit temperature gauge, controls, probes, cook history graph, status, and safety/diagnostics cards:
+
+1. Go to **Settings → Dashboards → Add Dashboard → New dashboard from scratch**, name it (for example "MAK Grill"), and open it
+2. Choose **⋮ → Edit dashboard → ⋮ → Raw configuration editor**
+3. Replace everything with the YAML below and save
+
+The entity IDs assume the default grill name "MAK Grill". If you named your grill differently, change the `mak_grill` part to match.
+
+<details>
+<summary>Dashboard YAML</summary>
+
+```yaml
+views:
+- title: MAK Grill
+  path: overview
+  cards:
+  - type: conditional
+    conditions:
+    - condition: state
+      entity: sensor.mak_grill_temperature
+      state_not:
+      - unknown
+      - unavailable
+    card:
+      type: gauge
+      entity: sensor.mak_grill_temperature
+      name: Pit Temperature
+      unit: °F
+      needle: true
+      min: 0
+      max: 600
+      segments:
+      - from: 0
+        color: '#43a047'
+      - from: 200
+        color: '#ffa600'
+      - from: 350
+        color: '#db4437'
+      - from: 450
+        color: '#9c27b0'
+  - type: conditional
+    conditions:
+    - condition: state
+      entity: sensor.mak_grill_temperature
+      state:
+      - unknown
+      - unavailable
+    card:
+      type: entities
+      title: Pit Temperature
+      entities:
+      - entity: binary_sensor.mak_grill_connected
+        name: Connected
+      - entity: sensor.mak_grill_power_state
+        name: Power State
+  - type: entities
+    title: Controls
+    entities:
+    - entity: number.mak_grill_setpoint
+      name: Setpoint
+    - entity: switch.mak_grill_power
+      name: Power
+    - entity: select.mak_grill_cook_mode
+      name: Cook Mode
+    - entity: select.mak_grill_zone_probe
+      name: Zone Probe
+  - type: entities
+    title: Probes
+    entities:
+    - entity: sensor.mak_grill_probe_1
+      name: Probe 1
+    - entity: sensor.mak_grill_probe_2
+      name: Probe 2
+    - entity: sensor.mak_grill_probe_3
+      name: Probe 3
+    - entity: number.mak_grill_setpoint
+      name: Setpoint
+  - type: history-graph
+    title: Cook History
+    hours_to_show: 12
+    entities:
+    - entity: sensor.mak_grill_temperature
+      name: Pit Temp
+    - entity: sensor.mak_grill_probe_1
+      name: Probe 1
+    - entity: sensor.mak_grill_probe_2
+      name: Probe 2
+    - entity: sensor.mak_grill_probe_3
+      name: Probe 3
+    - entity: number.mak_grill_setpoint
+      name: Setpoint
+  - type: entities
+    title: Status
+    entities:
+    - entity: binary_sensor.mak_grill_connected
+      name: Connected
+    - entity: sensor.mak_grill_power_state
+      name: Power State
+    - entity: sensor.mak_grill_grill_id
+      name: Grill ID
+  - type: entities
+    title: Safety & Diagnostics
+    entities:
+    - entity: binary_sensor.mak_grill_flameout
+      name: Flameout
+    - entity: binary_sensor.mak_grill_at_setpoint
+      name: At Setpoint
+    - entity: sensor.mak_grill_flags
+      name: Flags
+    - entity: sensor.mak_grill_last_seen
+      name: Last Seen
+    - entity: sensor.mak_grill_post_count
+      name: Post Count
+```
+
+</details>
 
 Want to build your own instead? See the [Dashboard Guide](https://github.com/papac0rn/ha-mak-grill/wiki/Dashboard-Guide) for copy-paste YAML for each card.
 
@@ -98,14 +212,20 @@ Point `makgrillsmobile.com` to your Home Assistant IP on your router. The Pellet
 
 1. Go to **Settings → Devices & Services → Add Integration**
 2. Search for **MAK Grill**
-3. Enter a name for your grill
+3. Enter a name for your grill and the **grill's IP address**
 4. Done — entities appear immediately
+
+Give the grill a DHCP reservation on your router so its address doesn't change. If it does change, update it under **Settings → Devices & Services → MAK Grill → ⋮ → Reconfigure**.
+
+### Security
+
+The grill can't log in to Home Assistant, so `/GrillService/Service` has no Home Assistant authentication. Instead the integration only accepts POSTs from the grill IP address you configured, and never through Nabu Casa remote access. Any other caller gets an empty `403` and never sees the grill's commands. Refused addresses are logged once each as a warning.
 
 ### 3. Verify
 
 Power on your grill. Within a few seconds, `binary_sensor.mak_grill_connected` should turn ON and temperature sensors should populate.
 
-You can also test with curl:
+You can also test with curl. The request must come from the configured grill address, so run it from a machine whose IP you temporarily enter under **Reconfigure**, and set the grill's address back afterwards:
 
 ```bash
 curl -X POST -d "GrillId=TEST&Temp=275&Power=ON&Probe1=165&Probe2=0&Probe3=0&GrillFlags=ATSET" http://YOUR_HA_IP/GrillService/Service
@@ -212,6 +332,7 @@ actions:
 
 | Version | Changes |
 |---------|---------|
+| **v1.4.0** | **Action needed after updating:** enter the grill's IP address under **Settings → Devices & Services → MAK Grill → ⋮ → Reconfigure**. Until you do, a repair notice is shown and the grill is ignored. The grill endpoint now only accepts POSTs from that address (not via Nabu Casa) and refuses everyone else with 403. The Create Dashboard button is removed; the dashboard YAML is in the README instead. Requires Home Assistant 2024.11 or later |
 | **v1.3.4** | Create Dashboard works again on Home Assistant 2026.x. Pressing it raised an error and made no dashboard, because newer Home Assistant moved the dashboard list the button relied on |
 | **v1.3.3** | Flameout no longer false-alarms while the grill warms up: it only counts once the pit has reached temperature. A setpoint above 450°F is judged against 450°F, what a MAK actually holds. A cook that never comes up to temperature within 45 minutes is reported as a flameout. README adds an example "up to temp" phone alert |
 | v1.3.2 | Published by mistake from the v1.3.1 code. Skip it and install v1.3.3 |
@@ -234,7 +355,8 @@ actions:
 | Entities show "unknown" but grill is on | Grill hasn't sent its first POST yet | Wait 10–15 seconds after power-on; check `binary_sensor.mak_grill_connected` |
 | Flameout comes on while the grill is still heating up | v1.3.2 and earlier started the 8-minute flameout timer as soon as the grill reached ON, before it was up to temperature | Fixed in v1.3.3. Update through HACS |
 | Flameout stays on with a setpoint above 450°F | v1.3.2 and earlier compared the pit to the full setpoint, which a MAK can't hold | Fixed in v1.3.3, which judges against 450°F |
-| Create Dashboard does nothing (log shows `AttributeError: ... dashboard_collection`) | v1.3.3 and earlier used a dashboard API that Home Assistant 2026.x removed | Fixed in v1.3.4. Update through HACS |
+| Grill stopped connecting after updating to v1.4.0 | No grill IP address is set yet (a repair notice says so) | **Settings → Devices & Services → MAK Grill → ⋮ → Reconfigure** and enter the grill's IP address |
+| Grill stopped connecting; log says "Refused a POST … not the configured grill address" | The grill's IP address changed | Update it under **Reconfigure** to the address in the log, and add a DHCP reservation on your router |
 | Temperatures read "unknown" | Grill is powered off or disconnected, or the probe is unplugged | Expected behavior (v1.3.1+). The generated dashboard hides the gauge and shows Connected / Power State until the grill posts again |
 | Grill on different VLAN can't reach HA | Firewall blocking cross-VLAN traffic on port 80 | Add a firewall rule allowing the grill's subnet to reach HA's IP on port 80 |
 
