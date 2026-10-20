@@ -3,6 +3,8 @@ DOMAIN = "mak_grill"
 DEFAULT_NAME = "MAK Grill"
 
 CONF_GRILL_NAME = "grill_name"
+# IP address of the grill; POSTs from any other address are refused
+CONF_GRILL_HOST = "grill_host"
 
 GRILL_TIMEOUT_SECONDS = 60.0
 FLAMEOUT_THRESHOLD_F = 35
