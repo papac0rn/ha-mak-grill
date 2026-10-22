@@ -60,16 +60,27 @@ The Pellet Boss WiFi controller POSTs telemetry to `makgrillsmobile.com` every f
 
 ## Dashboard
 
-A ready-made dashboard with a pit temperature gauge, controls, probes, cook history graph, status, and safety/diagnostics cards:
+Get the ready-made dashboard shown in the screenshots (pit temperature gauge, controls, probes, cook history graph, status, and safety/diagnostics) in about two minutes. You only copy and paste, no typing.
 
-1. Go to **Settings → Dashboards → Add Dashboard → New dashboard from scratch**, name it (for example "MAK Grill"), and open it
-2. Choose **⋮ → Edit dashboard → ⋮ → Raw configuration editor**
-3. Replace everything with the YAML below and save
+**1. Make an empty dashboard**
+1. Go to **Settings → Dashboards**
+2. Click **+ Add dashboard** (bottom right), then choose **New dashboard from scratch**
+3. Type a title, for example **MAK Grill**, and click **Create**
 
-The entity IDs assume the default grill name "MAK Grill". If you named your grill differently, change the `mak_grill` part to match.
+**2. Paste in the grill layout**
+1. Click your new **MAK Grill** dashboard in the sidebar to open it
+2. Click the **pencil** icon (top right) to start editing
+3. Click the **⋮** menu (top right) and choose **Raw configuration editor**
+4. Select everything already in the editor (**Ctrl+A**, or **Cmd+A** on a Mac) and delete it
+5. Copy the YAML below: hover over it and click the **copy** icon in its top-right corner
+6. Paste it into the editor, click **Save**, then click the **X** (top left) to close the editor, and click **Done**
 
-<details>
-<summary>Dashboard YAML</summary>
+Your grill dashboard is ready. Cards show "unknown" until the grill is turned on, which is normal.
+
+> **Named your grill something other than "MAK Grill"?** The YAML uses entity IDs that start with `mak_grill`. Check yours under **Settings → Devices & Services → MAK Grill → Entities** (for example `sensor.backyard_smoker_temperature`). Then, in the raw configuration editor, change every `mak_grill` to your name before saving.
+
+<details open>
+<summary>Dashboard YAML (click to hide)</summary>
 
 ```yaml
 views:
@@ -208,20 +219,42 @@ Point `makgrillsmobile.com` to your Home Assistant IP on your router. The Pellet
 
 **Pro tip:** If your grill is on a separate IoT VLAN, consider adding a firewall rule to block the grill from reaching external DNS servers. This forces it to use your router's DNS (with the rewrite) and makes the connection bulletproof.
 
-### 2. Add the integration
+### 2. Find your grill's IP address
+
+Home Assistant only listens to your grill, so it needs the grill's address on your network. Your router can tell you what it is:
+
+1. Turn the grill on so it joins your Wi-Fi
+2. Open your router's app or web page and find the list of connected devices. Depending on the brand it's called **Clients**, **Connected devices**, **Attached devices** or **DHCP leases**
+3. Look for a device named **MAK-WiFi** followed by letters and numbers (for example `MAK-WiFiCD240B`)
+4. Write down its IP address (for example `192.168.1.55`)
+
+**Make the address permanent.** Routers can hand out a different address later, and the grill would then be ignored. In the same router screen, open the grill and choose **Reserve IP**, **Fixed IP address**, **Static lease** or **DHCP reservation** (the wording varies). For example, on TP-Link Omada: **Clients → MAK-WiFi… → Config → Use Fixed IP Address**.
+
+### 3. Add the integration
 
 1. Go to **Settings → Devices & Services → Add Integration**
 2. Search for **MAK Grill**
-3. Enter a name for your grill and the **grill's IP address**
-4. Done — entities appear immediately
+3. Enter a name for your grill, and the **grill's IP address** from step 2
+4. Click **Submit**. Entities appear immediately
 
-Give the grill a DHCP reservation on your router so its address doesn't change. If it does change, update it under **Settings → Devices & Services → MAK Grill → ⋮ → Reconfigure**.
+To change the address later: **Settings → Devices & Services → MAK Grill → ⋮ (three dots) → Reconfigure**.
+
+### Updating from v1.3.x
+
+Version 1.4.0 needs the grill's IP address, which older versions never asked for. After you update and restart, Home Assistant shows a repair notice and ignores the grill until you add the address:
+
+1. Find the grill's IP address (step 2 above)
+   - Shortcut: turn the grill on, then open **Settings → System → Logs** and search for `mak_grill`. A line like *Refused a POST to /GrillService/Service from 192.168.1.55* shows the grill's address
+2. Go to **Settings → Devices & Services → MAK Grill → ⋮ (three dots) → Reconfigure**
+3. Enter the address and click **Submit**. The repair notice goes away and the grill connects on its next update, within a few seconds
+
+Your existing dashboard keeps working. The Create Dashboard button is gone in 1.4.0, but dashboards it made earlier are untouched.
 
 ### Security
 
 The grill can't log in to Home Assistant, so `/GrillService/Service` has no Home Assistant authentication. Instead the integration only accepts POSTs from the grill IP address you configured, and never through Nabu Casa remote access. Any other caller gets an empty `403` and never sees the grill's commands. Refused addresses are logged once each as a warning.
 
-### 3. Verify
+### 4. Verify
 
 Power on your grill. Within a few seconds, `binary_sensor.mak_grill_connected` should turn ON and temperature sensors should populate.
 
